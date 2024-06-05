@@ -7,15 +7,19 @@ export default class BoardList extends Component {
   state = {
     boardList : [],
     checkList : [],
-    borderId : 0
-  }
+    boardId : 0
+  };
+
   getList = ()=>{
     Axios.get('http://localhost:8000/list')
   .then( res=> {
     const {data} = res; //같은 문장 -> const data = res.data;
     this.setState({
-      boardList:data
+      boardList:data,
+      checkList: [],
+      boardId:0
     })
+    this.props.renderComplete(); //목록 출력 완료
   })
   .catch(function (error) {
     // 에러 핸들링
@@ -54,12 +58,24 @@ export default class BoardList extends Component {
       alert('하나만 체크해주세요');
     }
     this.setState({
-      borderId : checklist[0]
+      boardId : checklist[0]
     });
-    if(checklist.length === 1){
-      this.props.handleModify(true, this.state.borderId); //수정버튼을 누를때 수정모드
-    }
   };
+
+  componentDidUpdate = (prevProps, prevState)=>{
+    if(this.state.checkList.length === 1 && this.state.boardId !== prevState.boardId){
+      this.props.handleModify(this.state.boardId);
+    }
+
+    if(!this.props.isComplete && prevProps.isComplete !== this.props.isComplete){
+      this.getList(); //false일때만 다시 불러옴 
+    }
+  }
+  resetCheckList = () =>{
+    this.setState({
+      checkList:[]
+    })
+  }
 
   render() {
     console.log(this.state.boardList);

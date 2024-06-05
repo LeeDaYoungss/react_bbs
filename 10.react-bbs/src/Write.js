@@ -13,9 +13,34 @@ export default class Write extends Component {
     Axios.post('http://localhost:8000/insert',{ //post방식으로 넘김
       title: this.state.title,
       content: this.state.content
-    }) 
-  .then( res=> {
-    alert('등록 완료');
+    })
+    .then( res=> {
+      alert('등록 완료');
+    })
+    
+    .catch(function (error) {
+      // 에러 핸들링
+      console.log(error);
+    })
+  }
+
+  // 수정완료를 누르면 작동
+  update = ()=>{
+    Axios.post('http://localhost:8000/update',{ //post방식으로 넘김
+      // id, title, content 세개가 넘어옴
+      id:this.props.boardId,
+      title: this.state.title,
+      content: this.state.content
+    })
+  .then( res => {
+    alert('수정 완료');
+
+    // 초기화 - 수정 성공하면 할 일
+    this.setState({
+      title: '',
+      content:''
+    });
+    this.props.handleCancle();
   })
   
   .catch(function (error) {
@@ -24,20 +49,33 @@ export default class Write extends Component {
   })
   }
 
-  update = ()=>{
-    Axios.post('http://localhost:8000/update',{ //post방식으로 넘김
-      title: this.state.title,
-      content: this.state.content
-    }) 
-  .then( res=> {
-    alert('등록 완료');
-  })
-  
-  .catch(function (error) {
-    // 에러 핸들링
-    console.log(error);
-  })
+  // 수정모드이면서 boardId가 있을때 작동
+  // 번호의 글을 알려줄래? get방식으로!
+  detail = ()=>{
+    Axios.get(`http://localhost:8000/detail?id=${this.props.boardId}`)
+      .then(res=> {
+        if(res.data.length > 0){
+          this.setState({
+            title:res.data[0].title,
+            content:res.data[0].content,
+          })
+        }
+      })
+
+.catch(function (error) {
+  // 에러 핸들링
+  console.log(error);
+})
   }
+
+  componentDidUpdate = (prevProps)=>{
+    console.log('componentDidUpdate');
+    // this.props.boarId(=> 아이디가 있는지 확인)
+    if(this.props.isModifyMode && this.props.boardId !== prevProps.boardId){
+      this.detail();
+    }
+  }
+
 
   inputHandler = (e)=>{
     this.setState(
@@ -55,6 +93,7 @@ export default class Write extends Component {
                           name="title"
                           placeholder="제목을 입력하세요"
                           onChange={this.inputHandler}
+                          value={this.state.title}
             />
           </Form.Group>
           <Form.Group className="mb-3" controlId="content">
@@ -64,6 +103,7 @@ export default class Write extends Component {
               rows={3}
               name="content"
               onChange={this.inputHandler}
+              value={this.state.content}
             />
           </Form.Group>
         </Form>

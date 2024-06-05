@@ -31,6 +31,18 @@ app.get('/list', (req, res) => {
   });
 })
 
+
+// get방식으로 받는것은 query, post방식으로 받는것은 body
+app.get('/detail', (req, res) => {
+  const id = req.query.id;
+
+  const Sql = "SELECT title, content FROM board WHERE id=?";
+  db.query(Sql, [id], function(err, result) {
+    if (err) throw err;
+    res.send(result);
+  });
+})
+
 // req -> 전송한 데이터 (=request)
 app.post('/insert', (req, res) => {
   /*
@@ -45,6 +57,20 @@ app.post('/insert', (req, res) => {
     res.send(result);
   });
 })
+
+app.post('/update', (req, res) => {
+  const{id, title, content} = req.body;
+
+  let Sql = "UPDATE board SET title=?, content=? WHERE id=?";
+  db.query(Sql,[title, content, id],
+    function(err, result) {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+})
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
