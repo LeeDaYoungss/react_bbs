@@ -1,8 +1,132 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
 
+
+// 함수형
+function Write({boardId, handleCancle, isModifyMode}){
+  const[form, setForm] = useState({
+    title: '', 
+    content:''
+  });
+  
+
+  const navigate = useNavigate();
+
+  let write = ()=>{
+    Axios.post('http://localhost:8000/insert',{ //post방식으로 넘김
+      title: form.title,
+      content: form.content
+    })
+    .then( res=> {
+      alert('등록 완료');
+      navigate("/");
+    })
+    
+    .catch(function (error) {
+      // 에러 핸들링
+      console.log(error);
+    })
+  }
+
+  let update = ()=>{
+    Axios.post('http://localhost:8000/update',{ //post방식으로 넘김
+      // id, title, content 세개가 넘어옴
+      id:boardId,
+      title: form.title,
+      content: form.content
+    })
+    .then( res => {
+      alert('수정 완료');
+      navigate("/");
+  
+      // 초기화 - 수정 성공하면 할 일
+      setForm({
+        title: '', 
+        content:''
+      });
+      handleCancle();
+    })
+    
+    .catch(function (error) {
+      // 에러 핸들링
+      console.log(error);
+    })
+    }
+
+  let detail = ()=>{
+    Axios.get(`http://localhost:8000/detail?id=${boardId}`)
+      .then(res=> {
+        if(res.data.length > 0){
+          setForm({
+            title:res.data[0].title,
+            content:res.data[0].content,
+          })
+        }
+      })
+
+    .catch(function (error) {
+      // 에러 핸들링
+      console.log(error);
+    })
+  }
+  useEffect(()=>{
+    if(isModifyMode && boardId){
+      detail();
+    }
+  },[isModifyMode, boardId])
+
+  let inputHandler = (e)=>{
+
+      if(e.target === 'title'){
+        setForm({...form, title:e.target.value})
+      }else{
+        setForm({...form, content:e.target.value})
+      }
+    
+  }
+
+  return (
+    <>
+      <Form>
+        <Form.Group className="mb-3" controlId="title">
+          <Form.Label>제목</Form.Label>
+          <Form.Control type="text"
+                        name="title"
+                        placeholder="제목을 입력하세요"
+                        onChange={inputHandler}
+                        value={form.title}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3" controlId="content">
+          <Form.Label>내용</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            name="content"
+            onChange={inputHandler}
+            value={form.content}
+          />
+        </Form.Group>
+      </Form>
+      <div className="d-flex gap-1">
+        <Button variant="info" onClick={isModifyMode ? update : write}>작성완료</Button>
+
+        <Link to="/"> 
+          <Button variant="secondary">취소</Button>
+        </Link>
+        
+      </div>
+    </>
+  )
+
+}
+
+export default Write;
+
+/* class형
 export default class Write extends Component {
   state = {
     title: '', //수정모드일 때 제목이 나오기 때문에 변수를 만들어줌
@@ -75,7 +199,10 @@ export default class Write extends Component {
       this.detail();
     }
   }
-
+  // 수정 내용 표시
+  componentDidMount = ()=>{
+    this.detail();
+  }
 
   inputHandler = (e)=>{
     this.setState(
@@ -108,11 +235,16 @@ export default class Write extends Component {
           </Form.Group>
         </Form>
         <div className="d-flex gap-1">
-          {/* ajax에선 3안연산자 사용 */}
+          ajax에선 3안연산자 사용 
           <Button variant="info" onClick={this.props.isModifyMode ? this.update : this.write}>작성완료</Button>
-          <Button variant="secondary">취소</Button>
+
+           Link 함수로 다시 리스트 페이지로 이동 
+          <Link to="/"> 
+            <Button variant="secondary">취소</Button>
+          </Link>
+          
         </div>
       </>
     )
   }
-}
+}*/

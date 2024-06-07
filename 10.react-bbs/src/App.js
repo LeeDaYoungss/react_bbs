@@ -2,7 +2,9 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import BoardList from './BoardList';
 import Write from './Write';
-import React, { useState } from 'react';
+import View from './View';
+import React, { useState, useRef } from 'react';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   const[isModifyMode, setMode]=useState(false);
@@ -32,12 +34,22 @@ function App() {
 
   return (
     <div className="container">
-      <BoardList isComplete={isComplete} handleModify={handleModify} renderComplete={renderComplete}/>
-      <Write 
-        clearCheckbox={clearCheckbox}
-        handleCancle={handleCancle}
-        isModifyMode={isModifyMode}
-        boardId = {boardId}/>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<BoardList 
+            boardId = {boardId} 
+            isComplete={isComplete} 
+            handleModify={handleModify} 
+            renderComplete={renderComplete}/>}/>
+
+          <Route path="/write" element={<Write 
+            handleCancle={handleCancle}
+            isModifyMode={isModifyMode}
+            boardId = {boardId}/>} />
+
+          <Route path="/View" element={<View/>} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }

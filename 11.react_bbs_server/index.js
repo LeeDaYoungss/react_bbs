@@ -24,7 +24,7 @@ var db = mysql.createConnection({
 db.connect();
 
 app.get('/list', (req, res) => {
-  const Sql = "SELECT id, title, user_id, DATE_FORMAT(update_date, '%Y-%m-%d') AS update_date FROM board";
+  const Sql = "SELECT id, title, user_id, DATE_FORMAT(update_date, '%Y-%m-%d') AS update_date, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM board";
   db.query(Sql, function(err, result) {
     if (err) throw err;
     res.send(result);
@@ -63,6 +63,18 @@ app.post('/update', (req, res) => {
 
   let Sql = "UPDATE board SET title=?, content=? WHERE id=?";
   db.query(Sql,[title, content, id],
+    function(err, result) {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+})
+app.post('/delete', (req, res) => {
+  const id = req.body.boardIdList;
+
+  let Sql = `DELETE from board WHERE id in (${id})`;
+  console.log(id);
+  db.query(Sql,
     function(err, result) {
       if (err) throw err;
       res.send(result);
